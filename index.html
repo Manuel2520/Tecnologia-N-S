@@ -78,8 +78,10 @@ a{color:inherit}
 .price{font-size:18px;font-weight:700;color:var(--blue2);margin-top:auto}
 .price.ask{font-size:14px;color:var(--muted);font-weight:600}
 .acts{display:flex;gap:8px}
-.add{flex:1;background:var(--blue);color:#fff;border:0;border-radius:10px;padding:10px;font-weight:600;font-size:13.5px}
+.add{display:flex;align-items:center;justify-content:center;gap:6px;flex:1;background:var(--blue);color:#fff;border:0;border-radius:10px;padding:10px;font-weight:600;font-size:13.5px}
 .add:hover{background:#1f78e6}
+.add svg{width:16px;height:16px;flex:none}
+.qrbox .btn-wa span{display:inline}
 .ask-wa{flex:none;width:42px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--wa);border-radius:10px;color:var(--wa)}
 .ask-wa svg{width:20px;height:20px;fill:currentColor}
 .empty{text-align:center;color:var(--muted);padding:60px 10px;display:none}
@@ -106,7 +108,10 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:40px 0 0}
 .qty span{min-width:30px;text-align:center;font-size:13.5px}
 .rm{background:none;border:0;color:var(--muted);font-size:12.5px;text-decoration:underline;justify-self:end}
 .none{color:var(--muted);text-align:center;padding:50px 10px;font-size:14px}
-.df{padding:12px 16px;border-top:1px solid var(--line);display:grid;gap:10px}
+.df{padding:10px 16px;border-top:1px solid var(--line);display:grid;gap:8px}
+.rowbtns{display:flex;align-items:center;gap:14px}
+.rowbtns .inv-btn{flex:1}
+.it .qty{justify-self:start}
 .fields{margin:14px 16px 20px;padding:18px 16px;background:#f2f7ff;color:#06173a;border:1px solid #c7dcfb;border-top:4px solid #1f6fe0;border-radius:16px;display:grid;gap:12px}
 .fields h3{margin:0;font-size:15px;color:#06173a}
 .fld{display:grid;gap:5px;font-size:12.5px;font-weight:600;color:#3b4f7a}
@@ -122,7 +127,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:40px 0 0}
 .pay label:has(input:focus-visible){outline:2px solid #06173a;outline-offset:2px}
 .pay.bad label{border-color:#d93025}
 .err{display:none;margin:0;color:#c5221f;font-size:13px;font-weight:600}
-.sum{display:grid;gap:4px;font-size:13.5px;color:var(--muted)}
+.sum{display:grid;gap:4px;font-size:13.5px;color:var(--muted);padding:2px 16px 0}
 .sum div{display:flex;justify-content:space-between;gap:10px}
 .tot{display:flex;justify-content:space-between;font-weight:700;font-size:17px}
 .tot small{display:block;color:var(--muted);font-weight:400;font-size:11.5px}
@@ -153,6 +158,27 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:40px 0 0}
 .fab svg{width:30px;height:30px;fill:#fff}
 @media (max-width:520px){.bar img{width:70px;height:70px}.bar{gap:12px}.bar .t{font-size:19px}.btn-wa span,.btn-cart .lbl{display:none}.bar .t small{display:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:640px){
+  .wrap{padding:0 12px}
+  .layout{gap:8px}
+  .side,.side.min{width:64px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .card{padding:8px;gap:7px;border-radius:12px}
+  .thumb,.thumb.has{border-radius:8px}
+  .tag{font-size:10px;padding:2px 7px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .name{font-size:12.5px;min-height:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .price{font-size:15px}
+  .price.ask{font-size:12.5px}
+  .acts{gap:6px}
+  .add{padding:9px 4px;font-size:13px}
+  .ask-wa{width:38px}
+  .cnt{font-size:10.5px;right:6px;bottom:6px;padding:2px 7px}
+  .bar{gap:10px}
+  .bar img{width:62px;height:62px}
+  .bar .t{font-size:17px}
+  .qrbox{flex-direction:column;text-align:center}
+  .qrbox p{max-width:none}
+}
 </style>
 </head>
 <body>
@@ -201,6 +227,7 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:40px 0 0}
   <div class="dh"><span>Tu pedido</span><button class="x" id="closeCart" aria-label="Cerrar carrito">&times;</button></div>
   <div class="dbody">
     <div class="items" id="items"></div>
+    <div class="sum" id="sum"></div>
     <div class="fields" id="fields">
       <h3>Datos para agendar tu pedido</h3>
       <label class="fld">Nombre completo *<input id="cName" autocomplete="name" placeholder="Ej: Juan Pérez"></label>
@@ -217,13 +244,11 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:40px 0 0}
     </div>
   </div>
   <div class="df">
-    <div class="sum" id="sum"></div>
     <div class="tot"><div>Total<small id="totNote"></small></div><span id="total">CO$ 0</span></div>
-    <button class="send" id="send" disabled><svg viewBox="0 0 24 24"><use href="#i-wa"/></svg>Enviar pedido y factura por WhatsApp</button>
-    <button class="inv-btn" id="pdfBtn" disabled>Descargar factura (PDF)</button>
+    <button class="send" id="send" disabled><svg viewBox="0 0 24 24"><use href="#i-wa"/></svg>Enviar pedido y factura</button>
+    <div class="rowbtns"><button class="inv-btn" id="pdfBtn" disabled>Descargar factura (PDF)</button><button class="clear" id="clear">Vaciar</button></div>
     <button class="inv-btn" id="shareBtn" hidden>Compartir factura PDF por WhatsApp</button>
     <p class="ok" id="okMsg" role="status"></p>
-    <button class="clear" id="clear">Vaciar carrito</button>
   </div>
 </aside>
 
@@ -268,54 +293,54 @@ const KW = {"":"Todos","teclado-mouse":"Teclados","foto-streaming":"Foto","carga
 
 // [nombre, precio (null = consultar), categoría]
 const PRODUCTS = [
-["Kit de teclado y mouse inalámbrico blanco GKM520",54800,"teclado-mouse"],
-["Kit de teclado, mouse y pad mouse inalámbrico morado",82500,"teclado-mouse"],
-["Trípode con sensor de movimiento C12 — 1.8 metros",148500,"foto-streaming"],
-["Kit de teclado y mouse inalámbrico WB-900 Weibo",54900,"teclado-mouse"],
-["Trípode profesional para cámara con nivel líquido — 1.5 mts",72500,"foto-streaming"],
-["Cargador universal para portátil, 10 puntas",39500,"cargadores"],
-["Trípode para cámara con bluetooth A14",82500,"foto-streaming"],
-["Teclado bluetooth plegable, 30 cm abierto",64400,"teclado-mouse"],
-["Teclado mini para Smart TV — ergonómico",27500,"teclado-mouse"],
-["Teclado y mouse bluetooth RGB",64900,"teclado-mouse"],
-["Kit de teclado y mouse inalámbrico ergonómico Weibo WB-218",153900,"teclado-mouse"],
-["Combo plancha Titanium 450-3B",65900,"belleza-hogar"],
-["Ondulador keratina Pro 2511",50100,"belleza-hogar"],
-["Máquina de peluquería Kemei KM1986 con accesorios",137500,"belleza-hogar"],
-["Máquina para la barba patillera Kemei KM-2293",82400,"belleza-hogar"],
-["Máquina de peluquería VGR V679",75900,"belleza-hogar"],
-["Máquina de peluquería VGR V692",82500,"belleza-hogar"],
-["Plancha Remington Aguacate 9960",258500,"belleza-hogar"],
-["Máquina de peluquería VGR 5 en 1 — V172",76900,"belleza-hogar"],
-["Secador de pelo Pronova 5 en 1 — 5352",54900,"belleza-hogar"],
-["Secador Pronova 5350",42900,"belleza-hogar"],
-["Masajeador Pro Therapy",65500,"belleza-hogar"],
-["Cepillo secador alisador rizador 5 en 1",71500,"belleza-hogar"],
-["Combo cepillo + plancha Pronova Therapy 2601",82000,"belleza-hogar"],
-["Combo cepillo + plancha Ovocado Pro 2501",82000,"belleza-hogar"],
-["Rizador Pronova Sirena Pro 9663",54900,"belleza-hogar"],
-["Plancha para el cabello Pronova Keratina",53800,"belleza-hogar"],
-["Plancha Pronova Keratina Pro 9960",52800,"belleza-hogar"],
+["Kit de teclado y mouse inalámbrico blanco GKM520",55900,"teclado-mouse"],
+["Kit de teclado, mouse y pad mouse inalámbrico morado",84200,"teclado-mouse"],
+["Trípode con sensor de movimiento C12 — 1.8 metros",151500,"foto-streaming"],
+["Kit de teclado y mouse inalámbrico WB-900 Weibo",56000,"teclado-mouse"],
+["Trípode profesional para cámara con nivel líquido — 1.5 mts",74000,"foto-streaming"],
+["Cargador universal para portátil, 10 puntas",40300,"cargadores"],
+["Trípode para cámara con bluetooth A14",84200,"foto-streaming"],
+["Teclado bluetooth plegable, 30 cm abierto",65700,"teclado-mouse"],
+["Teclado mini para Smart TV — ergonómico",28000,"teclado-mouse"],
+["Teclado y mouse bluetooth RGB",66200,"teclado-mouse"],
+["Kit de teclado y mouse inalámbrico ergonómico Weibo WB-218",157000,"teclado-mouse"],
+["Combo plancha Titanium 450-3B",67200,"belleza-hogar"],
+["Ondulador keratina Pro 2511",51100,"belleza-hogar"],
+["Máquina de peluquería Kemei KM1986 con accesorios",140200,"belleza-hogar"],
+["Máquina para la barba patillera Kemei KM-2293",84000,"belleza-hogar"],
+["Máquina de peluquería VGR V679",77400,"belleza-hogar"],
+["Máquina de peluquería VGR V692",84200,"belleza-hogar"],
+["Plancha Remington Aguacate 9960",263700,"belleza-hogar"],
+["Máquina de peluquería VGR 5 en 1 — V172",78400,"belleza-hogar"],
+["Secador de pelo Pronova 5 en 1 — 5352",56000,"belleza-hogar"],
+["Secador Pronova 5350",43800,"belleza-hogar"],
+["Masajeador Pro Therapy",66800,"belleza-hogar"],
+["Cepillo secador alisador rizador 5 en 1",72900,"belleza-hogar"],
+["Combo cepillo + plancha Pronova Therapy 2601",83600,"belleza-hogar"],
+["Combo cepillo + plancha Ovocado Pro 2501",83600,"belleza-hogar"],
+["Rizador Pronova Sirena Pro 9663",56000,"belleza-hogar"],
+["Plancha para el cabello Pronova Keratina",54900,"belleza-hogar"],
+["Plancha Pronova Keratina Pro 9960",53900,"belleza-hogar"],
 ["Barra de sonido con bajo, bluetooth, FM, RCA",null,"audio-video"],
-["Plancha Remington Keratina S8599",258500,"belleza-hogar"],
-["Aro de luz 45 cm RGB con trípode y control",148500,"foto-streaming"],
-["Trípode para dos celulares y cámara digital — 1.8 mts",87900,"foto-streaming"],
-["Intercomunicador bluetooth Y20-2x para casco de moto",115500,"carro-moto"],
-["Diadema bluetooth Cat negro/pink con lector",54900,"audifonos"],
-["Splitter HDMI 1x2 — a dos pantallas HD",32900,"cables"],
-["Pad mouse gamer 70 x 30 cm, bordado",20400,"fundas-padmouse"],
-["Cabina de sonido NIA 8'' 2062 con micrófono alámbrico",214500,"audio-video"],
-["Teclado flexible, cable USB, impermeable",42800,"teclado-mouse"],
-["Kit de teclado y mouse rosado inalámbrico, receptor USB 2.4Ghz",64800,"teclado-mouse"],
-["Juego electrónico digital Triki (tres en línea) 9903",42800,"consolas-juegos"],
-["Cámara endoscópica tipo C, cable de 5 metros, luz led",49500,"foto-streaming"],
-["Capturadora USB a RCA",38500,"convertidores"],
-["Cable HDMI mallado 30 metros CM-30M",86900,"cables"],
-["Unidad quemadora con puerto USB, tipo C y lector",108900,"accesorios-pc"],
-["Cable HDMI de fibra óptica 20 metros v2.1 — 4K real",164900,"cables"],
-["Splitter de red activo, alta velocidad",54900,"cables"],
-["Adaptador bluetooth USB 5.1 para computador, emisor-receptor",15300,"accesorios-pc"],
-["Cabina de sonido 8'' NIA 2006 con micrófono inalámbrico",319000,"audio-video"],
+["Plancha Remington Keratina S8599",263700,"belleza-hogar"],
+["Aro de luz 45 cm RGB con trípode y control",151500,"foto-streaming"],
+["Trípode para dos celulares y cámara digital — 1.8 mts",89700,"foto-streaming"],
+["Intercomunicador bluetooth Y20-2x para casco de moto",117800,"carro-moto"],
+["Diadema bluetooth Cat negro/pink con lector",56000,"audifonos"],
+["Splitter HDMI 1x2 — a dos pantallas HD",33600,"cables"],
+["Pad mouse gamer 70 x 30 cm, bordado",20800,"fundas-padmouse"],
+["Cabina de sonido NIA 8'' 2062 con micrófono alámbrico",218800,"audio-video"],
+["Teclado flexible, cable USB, impermeable",43700,"teclado-mouse"],
+["Kit de teclado y mouse rosado inalámbrico, receptor USB 2.4Ghz",66100,"teclado-mouse"],
+["Juego electrónico digital Triki (tres en línea) 9903",43700,"consolas-juegos"],
+["Cámara endoscópica tipo C, cable de 5 metros, luz led",50500,"foto-streaming"],
+["Capturadora USB a RCA",39300,"convertidores"],
+["Cable HDMI mallado 30 metros CM-30M",88600,"cables"],
+["Unidad quemadora con puerto USB, tipo C y lector",111100,"accesorios-pc"],
+["Cable HDMI de fibra óptica 20 metros v2.1 — 4K real",168200,"cables"],
+["Splitter de red activo, alta velocidad",56000,"cables"],
+["Adaptador bluetooth USB 5.1 para computador, emisor-receptor",15600,"accesorios-pc"],
+["Cabina de sonido 8'' NIA 2006 con micrófono inalámbrico",325400,"audio-video"],
 ["Kit de teclado y mouse gamer negro Jertech Anivia KM180",null,"teclado-mouse"]
 ].map((a,i)=>({id:i,n:a[0],p:a[1],c:a[2]}));
 
@@ -657,7 +682,7 @@ function render(){
       <div class="name">${esc(p.n)}</div>
       <div class="price ${p.p === null ? "ask" : ""}">${p.p === null ? "Consultar precio" : money(p.p)}</div>
       <div class="acts">
-        <button class="add" data-add="${p.id}">Agregar al carrito</button>
+        <button class="add" data-add="${p.id}" aria-label="Agregar al carrito: ${esc(p.n)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg>Agregar</button>
         <a class="ask-wa" href="${ask}" target="_blank" rel="noopener" aria-label="Preguntar por WhatsApp: ${esc(p.n)}"><svg viewBox="0 0 24 24"><use href="#i-wa"/></svg></a>
       </div>
     </div>`;
@@ -669,7 +694,7 @@ $("grid").addEventListener("click", e => {
   const z = e.target.closest("[data-zoom]"); if(z){ openLb(+z.dataset.zoom, 0); return; }
   const b = e.target.closest("[data-add]"); if(!b) return;
   const id = b.dataset.add; setQty(id, (cart[id] || 0) + 1);
-  b.textContent = "¡Agregado!"; setTimeout(() => b.textContent = "Agregar al carrito", 900);
+  const h = b.innerHTML; b.textContent = "¡Agregado!"; setTimeout(() => b.innerHTML = h, 900);
 });
 
 // ===== Galería de fotos =====
