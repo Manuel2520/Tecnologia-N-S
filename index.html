@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <script async src="https://r.com/gtag/js?id=G-M2ZEXDH8X2script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
- 
-gtag('config', 'G-M2ZEXDH8X2');
-</script>
 <meta charset="UTF-8">
+<!-- Google Analytics (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-M2ZEXDH8X2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-M2ZEXDH8X2');
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>N&S Tecnología — Catálogo</title>
@@ -86,7 +86,7 @@ a{color:inherit}
 .price{font-size:18px;font-weight:700;color:var(--blue2);margin-top:auto}
 .price.ask{font-size:14px;color:var(--muted);font-weight:600}
 .acts{display:flex;gap:8px}
-.add{display:flex;align-items:center;justify-content:center;gap:6px;flex:1;background:var(--blue);color:#fff;border:0;border-radius:10px;padding:10px;font-weight:600;font-size:13.5px}
+.add{display:flex;align-items:center;justify-content:center;gap:6px;flex:1;min-width:0;background:var(--blue);color:#fff;border:0;border-radius:10px;padding:10px;font-weight:600;font-size:13.5px}
 .add:hover{background:#1f78e6}
 .add svg{width:16px;height:16px;flex:none}
 .qrbox .btn-wa span{display:inline}
@@ -187,6 +187,14 @@ footer{text-align:center;color:var(--muted);font-size:12.5px;margin:40px 0 0}
   .qrbox{flex-direction:column;text-align:center}
   .qrbox p{max-width:none}
 }
+@media (max-width:380px){
+  .acts{flex-direction:column}
+  .add{width:100%;flex:none}
+  .ask-wa{width:100%;height:34px}
+  .bar img{width:54px;height:54px}
+  .bar .t{font-size:15.5px}
+  .bar{gap:8px}
+}
 </style>
 </head>
 <body>
@@ -268,7 +276,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 // ===== CONFIGURACIÓN =====
 const WA_NUMBER = "573223855782"; // +57 322 385 5782
 const STORE = "N&S Tecnología";
-const WEB_URL = ""; // Dirección de tu página (ej: "https://tutienda.com"). Si está vacío, usa la dirección donde esté publicada la página
+const WEB_URL = "https://manuel2520.github.io/Tecnologia-N-S/"; // Dirección de tu página (la usa el QR de la factura)
 const DOMICILIO_BOGOTA = 10000; // valor del domicilio en Bogotá (otras ciudades: por confirmar)
 
 const I = {
@@ -364,6 +372,11 @@ const waLink = txt => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(txt)
 const HELLO = `Hola, quiero más información sobre los productos de ${STORE}.`;
 ["waTop","waFab","waQr"].forEach(id => $(id).href = waLink(HELLO));
 $("waEmpty").href = waLink(HELLO);
+
+// ===== Google Analytics: eventos de la tienda (sin datos personales del cliente) =====
+function track(name, params){ try { if(typeof gtag === "function") gtag("event", name, params || {}); } catch(e) {} }
+const gaItem = (p, q) => ({ item_id: String(p.id), item_name: p.n, item_category: CATS[p.c][0], price: p.p || 0, quantity: q || 1 });
+const trackAdd = id => { const p = byId(id); track("add_to_cart", { currency: "COP", value: p.p || 0, items: [gaItem(p, 1)] }); };
 
 // ===== Carrito =====
 let invMeta = null; // número y fecha de la factura del pedido actual
@@ -636,6 +649,7 @@ function buildPdf(o, inv){
 function doSend(){
   const o = collectOrder(); if(!o) return;
   const inv = invoiceMeta();
+  track("begin_checkout", { currency: "COP", value: o.total, payment_type: o.pay, items: o.items.map(i => ({ item_name: i.n, price: i.unit || 0, quantity: i.q })) });
   window.open(waLink(buildMessage(o, inv)), "_blank", "noopener"); // primero, dentro del gesto del usuario
   const doc = buildPdf(o, inv);
   if(doc){ doc.save(`Factura-${inv.no}.pdf`); say(`Pedido enviado por WhatsApp y factura ${inv.no} descargada.`); }
@@ -645,7 +659,7 @@ function doPdf(){
   const o = collectOrder(); if(!o) return;
   const inv = invoiceMeta(), doc = buildPdf(o, inv);
   if(!doc){ say("No se pudo crear el PDF. Revisa tu conexión a internet e inténtalo de nuevo."); return; }
-  doc.save(`Factura-${inv.no}.pdf`); say(`Factura ${inv.no} descargada.`);
+  doc.save(`Factura-${inv.no}.pdf`); say(`Factura ${inv.no} descargada.`); track("descargar_factura");
 }
 async function doShare(){
   const o = collectOrder(); if(!o) return;
@@ -664,7 +678,7 @@ tabs.innerHTML = [["","Todos","todo"], ...Object.entries(CATS).map(([k,v]) => [k
   .map(([k,l,ic]) => `<button class="tab" role="tab" data-c="${k}" title="${l}" aria-label="${l}" aria-selected="${k===""}"><span class="ic">${svg(ic)}</span><span class="lb">${KW[k]}</span></button>`).join("");
 tabs.addEventListener("click", e => {
   const t = e.target.closest(".tab"); if(!t) return;
-  cat = t.dataset.c; window.scrollTo({top:0});
+  cat = t.dataset.c; window.scrollTo({top:0}); track("view_item_list", { item_list_name: cat ? CATS[cat][0] : "Todos" });
   tabs.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b === t)));
   render();
 });
@@ -673,7 +687,7 @@ $("fold").onclick = () => {
   $("fold").setAttribute("aria-expanded", String(!m));
   $("fold").setAttribute("aria-label", m ? "Expandir menú" : "Contraer menú");
 };
-$("q").addEventListener("input", e => { q = e.target.value.trim().toLowerCase(); render(); });
+let searchT; $("q").addEventListener("input", e => { q = e.target.value.trim().toLowerCase(); render(); clearTimeout(searchT); searchT = setTimeout(() => { if(q.length >= 3) track("search", { search_term: q }); }, 900); });
 
 function render(){
   const items = PRODUCTS.filter(p => (!cat || p.c === cat) && (!q || p.n.toLowerCase().includes(q)));
@@ -701,7 +715,7 @@ function render(){
 $("grid").addEventListener("click", e => {
   const z = e.target.closest("[data-zoom]"); if(z){ openLb(+z.dataset.zoom, 0); return; }
   const b = e.target.closest("[data-add]"); if(!b) return;
-  const id = b.dataset.add; setQty(id, (cart[id] || 0) + 1);
+  const id = b.dataset.add; setQty(id, (cart[id] || 0) + 1); trackAdd(+id);
   const h = b.innerHTML; b.textContent = "¡Agregado!"; setTimeout(() => b.innerHTML = h, 900);
 });
 
@@ -716,7 +730,7 @@ function showLb(){
   $("lbStrip").style.display = ims.length > 1 ? "" : "none";
   $("lbStrip").innerHTML = ims.map((s,k) => `<button data-k="${k}" aria-label="Foto ${k+1}" aria-current="${k===lb.i}"><img src="${s}" alt=""></button>`).join("");
 }
-function openLb(id, i){ lb = {id, i}; showLb(); $("lbx").classList.add("on"); }
+function openLb(id, i){ lb = {id, i}; showLb(); { const p = byId(id); track("view_item", { currency: "COP", value: p.p || 0, items: [gaItem(p, 1)] }); } $("lbx").classList.add("on"); }
 function closeLb(){ $("lbx").classList.remove("on"); }
 function stepLb(d){ const n = IMG[byId(lb.id).n].length; lb.i = (lb.i + d + n) % n; showLb(); }
 $("lbPrev").onclick = () => stepLb(-1);
@@ -724,7 +738,7 @@ $("lbNext").onclick = () => stepLb(1);
 $("lbClose").onclick = closeLb;
 $("lbx").addEventListener("click", e => { if(e.target === $("lbx")) closeLb(); });
 $("lbStrip").addEventListener("click", e => { const b = e.target.closest("[data-k]"); if(b){ lb.i = +b.dataset.k; showLb(); } });
-$("lbAdd").onclick = () => { setQty(lb.id, (cart[lb.id] || 0) + 1); $("lbAdd").textContent = "¡Agregado!"; setTimeout(() => $("lbAdd").textContent = "Agregar al carrito", 900); };
+$("lbAdd").onclick = () => { setQty(lb.id, (cart[lb.id] || 0) + 1); trackAdd(lb.id); $("lbAdd").textContent = "¡Agregado!"; setTimeout(() => $("lbAdd").textContent = "Agregar al carrito", 900); };
 document.addEventListener("keydown", e => {
   if(!$("lbx").classList.contains("on")) return;
   if(e.key === "Escape") closeLb();
